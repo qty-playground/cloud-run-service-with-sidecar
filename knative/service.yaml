@@ -20,6 +20,11 @@ spec:
           image: my-app
           ports:
             - containerPort: 8080
+          env:
+            - name: DB_TAILNET_HOST
+              value: "100.80.130.36"
+            - name: DB_TAILNET_PORT
+              value: "5432"
           resources:
             limits:
               cpu: "1"
@@ -48,9 +53,9 @@ spec:
             # 使用 userspace networking（Cloud Run 不支援 TUN device）
             - name: TS_USERSPACE
               value: "true"
-            # 把流量轉發到 tailnet 上的目標 IP（本機 PostgreSQL）
-            - name: TS_TAILNET_TARGET_IP
-              value: "100.80.130.36"
+            # 啟用 SOCKS5 proxy（app 透過 gost 轉接此 proxy 連到 tailnet）
+            - name: TS_SOCKS5_SERVER
+              value: ":1055"
             # 啟用健康檢查 endpoint（/healthz on port 9002）
             - name: TS_ENABLE_HEALTH_CHECK
               value: "true"

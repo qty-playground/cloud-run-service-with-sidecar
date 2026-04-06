@@ -7,7 +7,7 @@ from fastapi import FastAPI
 app = FastAPI()
 
 DB_HOST = os.environ.get("DB_HOST", "localhost")
-DB_PORT = int(os.environ.get("DB_PORT", "5432"))
+DB_PORT = int(os.environ.get("DB_PORT", "15432"))
 DB_USER = os.environ.get("DB_USER", "demo")
 DB_PASSWORD = os.environ.get("DB_PASSWORD", "demo-cloud-run-2026")
 DB_NAME = os.environ.get("DB_NAME", "demo")
