@@ -48,6 +48,9 @@ spec:
             # 使用 userspace networking（Cloud Run 不支援 TUN device）
             - name: TS_USERSPACE
               value: "true"
+            # 啟用健康檢查 endpoint（/healthz on port 9002）
+            - name: TS_ENABLE_HEALTH_CHECK
+              value: "true"
           resources:
             limits:
               cpu: "0.5"
@@ -56,8 +59,9 @@ spec:
             - name: tailscale-state
               mountPath: /var/lib/tailscale
           startupProbe:
-            tcpSocket:
-              port: 41112
+            httpGet:
+              path: /healthz
+              port: 9002
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 6
