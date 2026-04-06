@@ -1,0 +1,7 @@
+version: 2
+
+services:
+  - name: cloud-run-service-with-sidecar
+    spec: knative/service.yaml
+    build:
+      my-app: Dockerfile

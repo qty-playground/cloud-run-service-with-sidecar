@@ -1,0 +1,70 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: cloud-run-service-with-sidecar
+spec:
+  template:
+    metadata:
+      annotations:
+        # container dependency：Tailscale 先啟動，app 才啟動
+        run.googleapis.com/container-dependencies: '{"my-app":["tailscale"]}'
+        # request-based billing
+        run.googleapis.com/cpu-throttling: "true"
+        # scaling 設定
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "1"
+    spec:
+      containers:
+        # ingress container：接收外部請求的主要 app
+        - name: my-app
+          image: my-app
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            failureThreshold: 3
+
+        # sidecar container：Tailscale daemon
+        - name: tailscale
+          image: ghcr.io/tailscale/tailscale:latest
+          env:
+            # auth key 從 GCP Secret Manager 注入
+            - name: TS_AUTHKEY
+              valueFrom:
+                secretKeyRef:
+                  name: tailscale-auth-key
+                  key: latest
+            # state 存放位置，使用記憶體掛載
+            - name: TS_STATE_DIR
+              value: /var/lib/tailscale
+            # 使用 userspace networking（Cloud Run 不支援 TUN device）
+            - name: TS_USERSPACE
+              value: "true"
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: 256Mi
+          volumeMounts:
+            - name: tailscale-state
+              mountPath: /var/lib/tailscale
+          startupProbe:
+            tcpSocket:
+              port: 41112
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 6
+
+      volumes:
+        # 用於存放 Tailscale state 的記憶體 volume
+        - name: tailscale-state
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
