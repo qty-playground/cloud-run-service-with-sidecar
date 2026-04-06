@@ -34,7 +34,7 @@ spec:
 
         # sidecar container：Tailscale daemon
         - name: tailscale
-          image: ghcr.io/tailscale/tailscale:latest
+          image: docker.io/tailscale/tailscale:latest
           env:
             # auth key 從 GCP Secret Manager 注入
             - name: TS_AUTHKEY
