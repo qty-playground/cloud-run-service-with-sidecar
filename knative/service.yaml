@@ -25,6 +25,8 @@ spec:
               value: "100.80.130.36"
             - name: DB_PORT
               value: "5432"
+            - name: ENABLE_SOCKS5_PROXY
+              value: "true"
           resources:
             limits:
               cpu: "1"
